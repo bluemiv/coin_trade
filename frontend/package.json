@@ -1,0 +1,17 @@
+{
+  "name": "goldcat",
+  "packageManager": "yarn@3.2.1",
+  "workspaces": {
+    "packages": [
+      "packages/**"
+    ]
+  },
+  "scripts": {
+    "app": "yarn workspace @goldcat/app",
+    "ui": "yarn workspace @goldcat/ui",
+    "core": "yarn workspace @goldcat/core"
+  },
+  "devDependencies": {
+    "prettier": "^2.7.1"
+  }
+}
