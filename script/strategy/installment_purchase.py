@@ -15,7 +15,7 @@ DEFAULT_OPTIONS = {
 
 
 class InstallmentPurchase:
-    def __init__(self, sell_rate=3, buy_rate=-15, black_list=None, options=None):
+    def __init__(self, sell_rate=3, buy_rate=-10, black_list=None, options=None):
         _config = config_parser.get_config()
         self._upbit = UpbitHandler(_config['access_key'], _config['secret_key'])
 
@@ -62,8 +62,6 @@ class InstallmentPurchase:
 
         for currency in currency_list:
             my_account_info = self._upbit.get_balance(currency)
-            if my_account_info is None:
-                continue
 
             # 처음 매수
             if not self._options['disabled_new_buy'] and my_account_info is None:
@@ -78,7 +76,7 @@ class InstallmentPurchase:
             current_market_price = self._upbit.get_current_price(currency)
             rate = self._upbit.get_rate(current_market_price, avg_currency_price)
 
-            self.log(currency, '{:f}%'.format(rate))
+            self.log(currency, '{:f}% / 매수한 금액: {}원'.format(rate, int(my_account_info['avg_krw_price'])))
 
             # 일정 퍼센트 이상일때는 전량 매도
             if not self._options['disabled_sell'] and rate >= self._sell_rate:
@@ -88,7 +86,9 @@ class InstallmentPurchase:
                 self._upbit.sell_market(currency, balance)
 
             # 일정 퍼센트 이하 일때는 추가 매수
-            if not self._options['disabled_buy'] and rate <= self._buy_rate:
+            if not self._options['disabled_buy'] \
+                    and rate <= self._buy_rate \
+                    and my_account_info['avg_krw_price'] <= 10 * 10000:
                 self.log(currency, '{}% 이하로 손실중. 추가 매수 진행. rate: {}'.format(self._buy_rate, rate))
                 self._upbit.buy_market(currency, self._init_krw)
 
